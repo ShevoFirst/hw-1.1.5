@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
@@ -13,24 +14,25 @@ public class Main {
         list.add(3);
         list.add(6);
         list.add(8);
-        list.add(1);
-        System.out.println(evenCount(list));
-        findMinMax(
-                list.stream(),
-                Integer::compareTo,
-                (integer, integer2) -> System.out.println(integer +" "+ integer)
-        );
+        list.add(2);
         System.out.println(list.toString());
+        System.out.println(evenCount(list)+" четных числа");
+        findMinMax(
+                list.stream().parallel(),
+                Integer::compareTo,
+                (integer, integer2) -> System.out.println(integer +" "+ integer2)
+        );
     }
     public static <T> void findMinMax(
             Stream<? extends T> stream,
             Comparator<? super T> order,
             BiConsumer<? super T, ? super T> minMaxConsumer
     ){
-        Supplier<Stream<? extends T>> streamSupplier = () -> stream;
-        Optional<? extends T> min = streamSupplier.get().min(order);
-        Optional<? extends T> max = streamSupplier.get().max(order);
-        if (min.isPresent() && max.isPresent())
+        List<? extends T> list = stream.collect(Collectors.toList());
+        Optional<? extends T> min = list.stream().min(order);
+        Optional<? extends T> max = list.stream().max(order);
+
+        if (!list.isEmpty())
             minMaxConsumer.accept(min.get(),max.get());
         else {
             minMaxConsumer.accept(null,null);
